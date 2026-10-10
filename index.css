@@ -149,3 +149,20 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .brand strong{color:#102d3a;letter-spacing:-.7px}
 .brand-path{background:linear-gradient(100deg,#20bca9,#6877e8);background-clip:text;-webkit-background-clip:text;color:transparent}
 @media(max-width:640px){.brand-mark{width:39px;height:39px;border-radius:13px}.brand-symbol{width:33px;height:33px}}
+
+/* Working How it works navigation section */
+#how-it-works{scroll-margin-top:96px}
+.how-it-works{max-width:1200px;margin:0 auto;padding:66px 28px 76px;border-top:1px solid var(--line)}
+.how-heading{max-width:650px;margin:0 auto 32px;text-align:center}
+.how-heading h2{font-size:clamp(28px,3.5vw,38px);letter-spacing:-1.4px;color:var(--dark);margin:12px 0}
+.how-heading p{color:var(--muted);line-height:1.8;margin:0}
+.how-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px}
+.how-step{position:relative;min-height:225px;padding:25px 22px;border:1px solid #dce8e9;border-radius:20px;background:linear-gradient(145deg,#fff,#f6fbfb);box-shadow:0 5px 0 #e5eeee,0 16px 34px #193e4d0a;transition:transform .2s,box-shadow .2s}
+.how-step:hover{transform:translateY(-5px);box-shadow:0 8px 0 #dcebea,0 22px 38px #193e4d14}
+.how-number{position:absolute;right:19px;top:17px;font-size:11px;font-weight:700;letter-spacing:1px;color:#8ba4ae}
+.how-step-icon{width:47px;height:47px;border-radius:15px;display:grid;place-items:center;color:#087e76;background:linear-gradient(145deg,#dffaf2,#e8edff);box-shadow:0 3px 0 #cfe5e8;margin-bottom:20px}
+.how-step h3{font-size:16px;line-height:1.35;margin:0 0 10px;color:var(--dark)}
+.how-step p{font-size:13px;line-height:1.75;color:var(--muted);margin:0}
+.how-back-link{margin:28px auto 0;display:flex;align-items:center;justify-content:center;gap:8px;width:max-content;max-width:100%;padding:12px 18px;border-radius:999px;background:linear-gradient(110deg,#0b756d,#315db3);color:#fff;font-size:13px;font-weight:700;box-shadow:0 4px 0 #d7e5ed}
+@media(max-width:850px){.how-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.how-it-works{padding:46px 20px 54px}.how-steps{grid-template-columns:1fr}.how-step{min-height:0}.how-back-link{width:100%;text-align:center}}
