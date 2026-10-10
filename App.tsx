@@ -13,6 +13,7 @@ type Category = 'all' | Scheme['category'];
 
 export default function App() {
   const [language, setLanguage] = useState<Language>('en');
+  const [largeText, setLargeText] = useState(false);
   const [mode, setMode] = useState<BrowseMode>('state');
   const [state, setState] = useState('');
   const [category, setCategory] = useState<Category>('all');
