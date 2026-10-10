@@ -81,8 +81,8 @@ export default function App() {
     { value: 'justice', label: t.catJustice },
   ];
 
-  return <div className={isTe ? 'app telugu' : 'app'}>
-    <Header language={language} onLanguageChange={setLanguage} />
+  return <div className={(isTe ? 'app telugu' : 'app') + (largeText ? ' large-text' : '')}>
+    <Header language={language} onLanguageChange={setLanguage} largeText={largeText} onToggleText={() => setLargeText(v => !v)} />
     {selected ? <SchemeDetails scheme={selected} language={language} onBack={() => setSelected(null)} /> : <>
       <main>
         <section className="welcome">
