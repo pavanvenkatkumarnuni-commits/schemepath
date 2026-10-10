@@ -1,1 +1,109 @@
-import {useMemo,useState} from 'react'; import {ArrowDown,ArrowRight,CheckCircle2,FileText,Leaf,Search,ShieldCheck,Sprout,Tractor,Wallet,Wheat,GraduationCap,HeartPulse,House,BriefcaseBusiness,Scale,FlaskConical,Trophy,Bus,Plane,Lightbulb,Users} from 'lucide-react'; import Header from './Header'; import SchemeCard from './SchemeCard'; import SchemeDetails from './SchemeDetails'; import {schemes} from './schemes'; import {states,districtsByState} from './states'; import {copy} from './translations'; import type {Language,Scheme} from './types'; type Category='all'|Scheme['category']; export default function App(){const[language,setLanguage]=useState<Language>('en');const[state,setState]=useState('');const[district,setDistrict]=useState('');const[category,setCategory]=useState<Category>('all');const[search,setSearch]=useState('');const[browseMode,setBrowseMode]=useState<'state'|'central'>('state');const[selected,setSelected]=useState<Scheme|null>(null);const t=copy[language];const visible=useMemo(()=>schemes.filter(s=>(browseMode==='central'?s.scope==='central':state!==''&&s.scope==='state'&&s.states.includes(state))&&(category==='all'||s.category===category)&&(!search.trim()||`${s.name.en} ${s.name.te} ${s.summary.en} ${s.summary.te}`.toLowerCase().includes(search.trim().toLowerCase()))),[browseMode,state,category,search]);const go=()=>document.getElementById('schemes')?.scrollIntoView({behavior:'smooth'});const cats=[{id:'agriculture' as Category,icon:Sprout,label:t.catAgriculture},{id:'banking' as Category,icon:Wallet,label:t.catBanking},{id:'business' as Category,icon:BriefcaseBusiness,label:t.catBusiness},{id:'education' as Category,icon:GraduationCap,label:t.catEducation},{id:'health' as Category,icon:HeartPulse,label:t.catHealth},{id:'housing' as Category,icon:House,label:t.catHousing},{id:'justice' as Category,icon:Scale,label:t.catJustice},{id:'science' as Category,icon:FlaskConical,label:t.catScience},{id:'employment' as Category,icon:Tractor,label:t.catEmployment},{id:'social' as Category,icon:Users,label:t.catSocial},{id:'sports' as Category,icon:Trophy,label:t.catSports},{id:'transport' as Category,icon:Bus,label:t.catTransport},{id:'tourism' as Category,icon:Plane,label:t.catTourism},{id:'utilities' as Category,icon:Lightbulb,label:t.catUtilities},{id:'women' as Category,icon:HeartPulse,label:t.catWomen}];return <div className={language==='te'?'app telugu':'app'}><Header language={language} onLanguageChange={setLanguage}/><main>{selected?<SchemeDetails scheme={selected} language={language} onBack={()=>setSelected(null)}/>:<><section className="hero" id="home"><div className="hero-content"><span className="eyebrow"><span className="eyebrow-dot"/>{t.badge}</span><h1>{t.heroTitle}</h1><p className="hero-copy">{t.heroText}</p><div className="hero-actions"><button className="button button-primary" onClick={go}>{t.find}<ArrowRight size={18}/></button><a className="button button-secondary" href="#schemes">{t.browse}<ArrowDown size={17}/></a></div><div className="trust-line"><CheckCircle2 size={17}/>{t.trust}</div></div><div className="hero-art" role="img" aria-label="Stylized green agricultural landscape"><div className="sun"/><div className="hill hill-back"/><div className="hill hill-front"/><div className="field-lines"><span/><span/><span/><span/></div><div className="farm-badge"><span className="badge-icon"><Sprout size={21}/></span><span><strong>SchemePath</strong><small>{language==='en'?'Your next step, made clear':'మీ తదుపరి అడుగు సులభంగా'}</small></span></div><div className="floating-leaf leaf-one"><Leaf size={27}/></div><div className="floating-leaf leaf-two"><Wheat size={25}/></div></div><div className="hero-state-panel"><label htmlFor="state-select">{t.stateLabel}</label><div className="state-controls"><select id="state-select" value={state} onChange={e=>{setState(e.target.value);setDistrict('')}}><option value="">{t.chooseState}</option>{states.map(s=><option key={s}>{s}</option>)}</select><select aria-label={t.districtLabel} value={district} onChange={e=>setDistrict(e.target.value)} disabled={!state||!districtsByState[state]}><option value="">{t.chooseDistrict}</option>{(districtsByState[state]||[]).map(d=><option key={d}>{d}</option>)}</select><button className="button button-primary state-submit" onClick={go}>{t.find}<ArrowRight size={17}/></button></div><p className="state-hint">{state?`${t.matched} ${state}${district?' · '+district:''}.`:t.statePick}</p></div></section><section className="section needs-section"><div className="section-heading"><div><span className="eyebrow">{language==='en'?'START WITH YOUR GOAL':'మీ అవసరంతో ప్రారంభించండి'}</span><h2>{t.needsTitle}</h2><p>{t.needsText}</p></div><button className={'category-all '+(category==='all'?'active':'')} onClick={()=>setCategory('all')}>{t.all}<ArrowRight size={16}/></button></div><div className="category-grid">{cats.map(({id,icon:Icon,label})=><button key={id} className={'category-card '+(category===id?'selected':'')} onClick={()=>{setCategory(category===id?'all':id);go()}}><span className="category-icon"><Icon size={22}/></span><span className="category-label">{label}</span><ArrowRight size={17} className="category-arrow"/></button>)}</div></section><section className="section schemes-section" id="schemes"><div className="section-heading"><div><span className="eyebrow">{language==='en'?'EXPLORE SUPPORT':'సహాయాన్ని అన్వేషించండి'}</span><h2>{t.featured}</h2><p>{t.featuredText}</p></div></div><div className="scheme-tabs" role="tablist" aria-label={language==='en'?'Scheme type':'పథకం రకం'}><button role="tab" aria-selected={browseMode==='state'} className={browseMode==='state'?'active':''} onClick={()=>{setBrowseMode('state');setSearch('')}}>{language==='en'?'State Government':'రాష్ట్ర ప్రభుత్వం'}</button><button role="tab" aria-selected={browseMode==='central'} className={browseMode==='central'?'active':''} onClick={()=>{setBrowseMode('central');setSearch('')}}>{language==='en'?'Central Government':'కేంద్ర ప్రభుత్వం'}</button></div><div className="filters"><label className="search-box"><Search size={18}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.search} disabled={browseMode==='state'&&!state}/></label></div>{browseMode==='state'&&!state?<div className="empty-state"><Sprout size={28}/><h3>{language==='en'?'Select your state to view schemes':'పథకాలను చూడటానికి మీ రాష్ట్రాన్ని ఎంచుకోండి'}</h3><p>{language==='en'?'Choose a state or Union Territory above, or switch to the Central Government tab.':'పై భాగంలో మీ రాష్ట్రం లేదా కేంద్రపాలిత ప్రాంతాన్ని ఎంచుకోండి. ఆ రాష్ట్రానికి సంబంధించిన పథకాలు మాత్రమే చూపబడతాయి.'}</p></div>:visible.length?<div className="scheme-grid">{visible.map(s=><SchemeCard key={s.id} scheme={s} language={language} onOpen={setSelected}/>)}</div>:<div className="empty-state"><Search size={28}/><h3>{t.noResults}</h3><button className="button button-secondary" onClick={()=>{setSearch('');setCategory('all')}}>{t.all}</button></div>}<p className="catalogue-note"><ShieldCheck size={17}/>{language==='en'?'Some sample listings are still under review. For the wider official catalogue, search myScheme.gov.in. Always confirm eligibility and deadlines with the responsible department.':'కొన్ని నమూనా వివరాలు ఇంకా పరిశీలనలో ఉన్నాయి. విస్తృత అధికారిక జాబితా కోసం myScheme.gov.in చూడండి. అర్హత, చివరి తేదీలను సంబంధిత శాఖతో నిర్ధారించండి.'}</p><div className="state-directory-panel"><h3>{language==='en'?'Need state-specific schemes too?':'రాష్ట్రానికి సంబంధించిన పథకాలు కూడా కావాలా?'}</h3><p>{language==='en'?'The official national directory includes Central and State/UT schemes. SchemePath lists the schemes currently included in this catalogue; check the official portal for a wider current listing.':'అధికారిక జాతీయ జాబితాలో వేలాది కేంద్ర, రాష్ట్ర/కేంద్రపాలిత ప్రాంత పథకాలు ఉన్నాయి. తాజా జాబితా కోసం అక్కడ మీ రాష్ట్రాన్ని ఎంచుకోండి. SchemePath లేని పథకాలు లేదా అర్హత నియమాలను కల్పించదు.'}</p><div className="hero-actions"><a className="button button-primary" href="https://www.myscheme.gov.in/" target="_blank" rel="noreferrer">{language==='en'?'Browse Central + State/UT schemes':'కేంద్ర + రాష్ట్ర పథకాలను చూడండి'} <ArrowRight size={16}/></a>{state==='Telangana'&&<a className="button button-secondary" href="https://www.telangana.gov.in/government-initiatives/" target="_blank" rel="noreferrer">{language==='en'?'Telangana official initiatives':'తెలంగాణ అధికారిక పథకాలు'} <ArrowRight size={16}/></a>}{state==='Andhra Pradesh'&&<a className="button button-secondary" href="https://apagrisnet.gov.in/" target="_blank" rel="noreferrer">{language==='en'?'Andhra Pradesh agriculture portal':'ఆంధ్రప్రదేశ్ వ్యవసాయ పోర్టల్'} <ArrowRight size={16}/></a>}</div><p><a className="text-button" href="https://www.myscheme.gov.in/" target="_blank" rel="noreferrer">{language==='en'?'Explore the official national scheme directory':'అధికారిక జాతీయ పథకాల జాబితాను చూడండి'} <ArrowRight size={16}/></a></p></div></section><section className="how-section" id="how-it-works"><div className="section narrow"><span className="eyebrow">{language==='en'?'SIMPLE BY DESIGN':'సులభంగా రూపొందించబడింది'}</span><h2>{t.howTitle}</h2><div className="steps-grid"><article className="step-card"><span className="step-number">01</span><div className="step-icon"><Sprout size={23}/></div><h3>{t.how1Title}</h3><p>{t.how1Text}</p></article><article className="step-card"><span className="step-number">02</span><div className="step-icon"><FileText size={23}/></div><h3>{t.how2Title}</h3><p>{t.how2Text}</p></article><article className="step-card"><span className="step-number">03</span><div className="step-icon"><ShieldCheck size={23}/></div><h3>{t.how3Title}</h3><p>{t.how3Text}</p></article></div></div></section><section className="section about-section" id="about"><div className="about-icon"><ShieldCheck size={26}/></div><div><h2>{t.noteTitle}</h2><p>{t.noteText}</p></div></section></>}</main><footer className="site-footer"><a className="brand footer-brand" href="#home"><span className="brand-mark"><Sprout size={20}/></span><strong>SchemePath</strong></a><p>{t.footer}</p><span>© {new Date().getFullYear()} SchemePath</span></footer></div>}
+import { useMemo, useState } from 'react';
+import { ArrowRight, Search, Sprout, ShieldCheck, Landmark, MapPinned, FileText } from 'lucide-react';
+import Header from './Header';
+import SchemeCard from './SchemeCard';
+import SchemeDetails from './SchemeDetails';
+import { schemes } from './schemes';
+import { states } from './states';
+import { copy } from './translations';
+import type { Language, Scheme } from './types';
+
+type BrowseMode = 'state' | 'central';
+type Category = 'all' | Scheme['category'];
+
+export default function App() {
+  const [language, setLanguage] = useState<Language>('en');
+  const [mode, setMode] = useState<BrowseMode>('state');
+  const [state, setState] = useState('');
+  const [category, setCategory] = useState<Category>('all');
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<Scheme | null>(null);
+  const t = copy[language];
+  const isTe = language === 'te';
+
+  const visible = useMemo(() => schemes.filter((scheme) => {
+    const inScope = mode === 'central'
+      ? scheme.scope === 'central'
+      : Boolean(state) && scheme.scope === 'state' && scheme.states.includes(state);
+    const inCategory = category === 'all' || scheme.category === category;
+    const q = search.trim().toLocaleLowerCase();
+    const inSearch = !q || [scheme.name.en, scheme.name.te, scheme.summary.en, scheme.summary.te]
+      .some((value) => value.toLocaleLowerCase().includes(q));
+    return inScope && inCategory && inSearch;
+  }), [mode, state, category, search]);
+
+  const switchMode = (next: BrowseMode) => {
+    setMode(next);
+    setSearch('');
+    setCategory('all');
+    setSelected(null);
+  };
+
+  const categories: { value: Category; label: string }[] = [
+    { value: 'all', label: isTe ? 'అన్ని వర్గాలు' : 'All categories' },
+    { value: 'agriculture', label: t.catAgriculture },
+    { value: 'banking', label: t.catBanking },
+    { value: 'business', label: t.catBusiness },
+    { value: 'education', label: t.catEducation },
+    { value: 'health', label: t.catHealth },
+    { value: 'housing', label: t.catHousing },
+    { value: 'employment', label: t.catEmployment },
+    { value: 'social', label: t.catSocial },
+    { value: 'transport', label: t.catTransport },
+    { value: 'utilities', label: t.catUtilities },
+    { value: 'women', label: t.catWomen },
+    { value: 'sports', label: t.catSports },
+    { value: 'tourism', label: t.catTourism },
+    { value: 'science', label: t.catScience },
+    { value: 'justice', label: t.catJustice },
+  ];
+
+  return <div className={isTe ? 'app telugu' : 'app'}>
+    <Header language={language} onLanguageChange={setLanguage} />
+    {selected ? <SchemeDetails scheme={selected} language={language} onBack={() => setSelected(null)} /> : <>
+      <main>
+        <section className="welcome">
+          <div className="welcome-copy">
+            <span className="eyebrow"><Sprout size={15} /> SCHEME DIRECTORY · INDIA</span>
+            <h1>{isTe ? 'మీకు అందుబాటులో ఉన్న ప్రభుత్వ పథకాలను కనుగొనండి' : 'Find government schemes made for you.'}</h1>
+            <p>{isTe ? 'ముందుగా రాష్ట్ర లేదా కేంద్ర ప్రభుత్వ పథకాలను ఎంచుకోండి. అధికారిక వివరాలను దరఖాస్తు ముందు నిర్ధారించండి.' : 'Explore state and central government support in one simple directory. Check official details before applying.'}</p>
+            <div className="welcome-note"><ShieldCheck size={17}/>{isTe ? 'అధికారిక వెబ్‌సైట్‌లో అర్హత, గడువులను నిర్ధారించండి' : 'Always verify eligibility and deadlines on the official website.'}</div>
+          </div>
+          <div className="welcome-art" aria-hidden="true"><div className="art-circle"><Landmark size={68}/></div><div className="art-leaf"><Sprout size={38}/></div><span className="art-caption">Support for every step</span></div>
+        </section>
+
+        <section className="catalogue" id="schemes">
+          <div className="catalogue-heading">
+            <div><span className="eyebrow">{isTe ? 'పథకాల జాబితా' : 'THE SCHEME DIRECTORY'}</span><h2>{isTe ? 'ఎక్కడి నుంచి ప్రారంభించాలి?' : 'Where would you like to start?'}</h2><p>{isTe ? 'మీకు సరిపోయే ప్రభుత్వాన్ని ఎంచుకోండి.' : 'Choose a government level to see the right list.'}</p></div>
+          </div>
+
+          <div className="mode-tabs" role="tablist" aria-label="Government level">
+            <button type="button" role="tab" aria-selected={mode === 'state'} className={mode === 'state' ? 'mode-tab active' : 'mode-tab'} onClick={() => switchMode('state')}><MapPinned size={20}/><span><strong>{isTe ? 'రాష్ట్ర ప్రభుత్వ పథకాలు' : 'State Government'}</strong><small>{isTe ? 'మీ రాష్ట్రాన్ని ఎంచుకోండి' : 'Choose your state'}</small></span></button>
+            <button type="button" role="tab" aria-selected={mode === 'central'} className={mode === 'central' ? 'mode-tab active' : 'mode-tab'} onClick={() => switchMode('central')}><Landmark size={20}/><span><strong>{isTe ? 'కేంద్ర ప్రభుత్వ పథకాలు' : 'Central Government'}</strong><small>{isTe ? 'దేశవ్యాప్తంగా వర్తించే పథకాలు' : 'Schemes from the Union Government'}</small></span></button>
+          </div>
+
+          {mode === 'state' && <div className="state-picker">
+            <label htmlFor="state-picker">{isTe ? 'మీ రాష్ట్రం లేదా కేంద్రపాలిత ప్రాంతం' : 'Select your state or Union Territory'}</label>
+            <select id="state-picker" value={state} onChange={(event) => { setState(event.target.value); setSearch(''); setCategory('all'); }}>
+              <option value="">{isTe ? '— రాష్ట్రాన్ని ఎంచుకోండి —' : '— Choose a state —'}</option>
+              {states.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+            {!state && <p className="field-hint">{isTe ? 'పథకాలను చూడటానికి ముందుగా రాష్ట్రాన్ని ఎంచుకోండి.' : 'Select a state first. We will not show a mixed list of schemes.'}</p>}
+          </div>}
+
+          <div className="filter-row">
+            <label className="search-control"><Search size={18}/><input value={search} disabled={mode === 'state' && !state} onChange={(event) => setSearch(event.target.value)} placeholder={isTe ? 'పథకం పేరు లేదా విషయం వెతకండి' : 'Search by scheme name or keyword'} /></label>
+            <select aria-label="Filter by category" value={category} disabled={mode === 'state' && !state} onChange={(event) => setCategory(event.target.value as Category)}>{categories.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>
+          </div>
+
+          {mode === 'state' && !state ? <div className="empty-panel"><div className="empty-icon"><MapPinned size={27}/></div><h3>{isTe ? 'మీ రాష్ట్రాన్ని ఎంచుకోండి' : 'Your state schemes start here'}</h3><p>{isTe ? 'పై జాబితా నుంచి మీ రాష్ట్రాన్ని ఎంచుకున్న తర్వాత, ఆ రాష్ట్రానికి సంబంధించిన పథకాలు మాత్రమే కనిపిస్తాయి.' : 'Choose a state above to see only schemes assigned to that state. Or switch to the Central Government tab to browse national schemes.'}</p><button className="official-button" onClick={() => switchMode('central')}>{isTe ? 'కేంద్ర పథకాలను చూడండి' : 'Browse Central Government schemes'} <ArrowRight size={17}/></button></div>
+          : visible.length > 0 ? <><div className="results-line"><span>{isTe ? 'కనిపిస్తున్న పథకాలు' : 'Schemes listed'}</span><strong>{visible.length}</strong><span className="results-context">{mode === 'central' ? (isTe ? 'కేంద్ర ప్రభుత్వం' : 'Central Government') : state}</span></div><div className="scheme-grid">{visible.map((scheme) => <SchemeCard key={scheme.id} scheme={scheme} language={language} onOpen={setSelected}/>)}</div></>
+          : <div className="empty-panel"><div className="empty-icon"><Search size={27}/></div><h3>{isTe ? 'పథకాలు కనబడలేదు' : 'No schemes found for this selection'}</h3><p>{mode === 'state' ? (isTe ? 'ఈ రాష్ట్రానికి ఇంకా పథకాలు జోడించలేదు. అధికారిక వనరును చూడండి.' : 'There are no state schemes in this catalogue for the selected state yet. Check the official directory for a complete listing.') : (isTe ? 'వేరే పదంతో వెతకండి.' : 'Try another keyword or clear the category filter.')}</p>{mode === 'state' && <a className="official-button" href="https://www.myscheme.gov.in/" target="_blank" rel="noreferrer">{isTe ? 'అధికారిక పథకాల జాబితా' : 'Visit official scheme directory'} <ArrowRight size={17}/></a>}</div>}
+
+          <div className="catalogue-footer"><FileText size={18}/><p>{isTe ? 'ఈ జాబితా సమాచార సహాయార్థం మాత్రమే. అర్హత, పత్రాలు, దరఖాస్తు గడువులు అధికారిక ప్రభుత్వ పోర్టల్‌లో నిర్ధారించండి.' : 'This directory is informational. Confirm current eligibility, documents and application dates with the official government portal.'}</p><a href="https://www.myscheme.gov.in/" target="_blank" rel="noreferrer">{isTe ? 'myScheme అధికారిక పోర్టల్' : 'Official myScheme portal'} <ArrowRight size={15}/></a></div>
+        </section>
+      </main>
+      <footer className="site-footer"><a className="footer-brand" href="#top">SchemePath</a><span>{isTe ? 'ప్రభుత్వ పథకాలను సులభంగా కనుగొనండి' : 'A simpler way to find government support.'}</span><span>© {new Date().getFullYear()} SchemePath</span></footer>
+    </>}
+  </div>;
+}
