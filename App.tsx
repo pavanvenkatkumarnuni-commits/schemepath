@@ -24,7 +24,7 @@ export default function App() {
   const visible = useMemo(() => schemes.filter((scheme) => {
     const inScope = mode === 'central'
       ? scheme.scope === 'central'
-      : Boolean(state) && scheme.scope === 'state' && scheme.states.includes(state);
+      : Boolean(state) && (scheme.scope === 'central' || (scheme.scope === 'state' && scheme.states.includes(state)));
     const inCategory = category === 'all' || scheme.category === category;
     const q = search.trim().toLocaleLowerCase();
     const inSearch = !q || [scheme.name.en, scheme.name.te, scheme.summary.en, scheme.summary.te]
