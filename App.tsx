@@ -18,6 +18,10 @@ export default function App() {
   const [category, setCategory] = useState<Category>('all');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Scheme | null>(null);
+  const [eligibilityOpen, setEligibilityOpen] = useState(false);
+  const [profileState, setProfileState] = useState('Telangana');
+  const [ageGroup, setAgeGroup] = useState('adult');
+  const [profiles, setProfiles] = useState<string[]>(['student']);
   const t = copy[language];
   const isTe = language === 'te';
 
@@ -31,6 +35,24 @@ export default function App() {
       .some((value) => value.toLocaleLowerCase().includes(q));
     return inScope && inCategory && inSearch;
   }), [mode, state, category, search]);
+
+  const profileOptions = [
+    { id: 'farmer', en: 'Farmer / agriculture', te: 'రైతు / వ్యవసాయం', categories: ['agriculture'] },
+    { id: 'student', en: 'Student / education', te: 'విద్యార్థి / విద్య', categories: ['education'] },
+    { id: 'woman', en: 'Woman / family support', te: 'మహిళ / కుటుంబ సహాయం', categories: ['women', 'social', 'transport', 'utilities'] },
+    { id: 'business', en: 'Small business / self-employed', te: 'చిన్న వ్యాపారం / స్వయం ఉపాధి', categories: ['business', 'banking', 'employment'] },
+    { id: 'health', en: 'Health / medical support', te: 'ఆరోగ్యం / వైద్య సహాయం', categories: ['health'] },
+    { id: 'housing', en: 'Housing support', te: 'గృహవసతి సహాయం', categories: ['housing'] },
+    { id: 'job', en: 'Job / skills training', te: 'ఉద్యోగం / నైపుణ్య శిక్షణ', categories: ['employment', 'science'] },
+    { id: 'pension', en: 'Pension / social welfare', te: 'పెన్షన్ / సామాజిక సంక్షేమం', categories: ['social'] },
+  ];
+  const eligibilityMatches = useMemo(() => {
+    const chosenCategories = profileOptions.filter(p => profiles.includes(p.id)).flatMap(p => p.categories);
+    return schemes.filter(s => {
+      const regionMatches = s.scope === 'central' || s.states.includes(profileState);
+      return regionMatches && (chosenCategories.length === 0 || chosenCategories.includes(s.category));
+    });
+  }, [profiles, profileState]);
 
   const switchMode = (next: BrowseMode) => {
     setMode(next);
@@ -75,7 +97,18 @@ export default function App() {
         <section className="catalogue" id="schemes">
           <div className="catalogue-heading">
             <div><span className="eyebrow">{isTe ? 'పథకాల జాబితా' : 'THE SCHEME DIRECTORY'}</span><h2>{isTe ? 'ఎక్కడి నుంచి ప్రారంభించాలి?' : 'Where would you like to start?'}</h2><p>{isTe ? 'మీకు సరిపోయే ప్రభుత్వాన్ని ఎంచుకోండి.' : 'Choose a government level to see the right list.'}</p></div>
+            <button type="button" className="eligibility-launch" onClick={() => setEligibilityOpen(v => !v)}><ShieldCheck size={18}/>{isTe ? 'నా అర్హతను పరిశీలించండి' : 'Check my eligibility'}<ArrowRight size={16}/></button>
           </div>
+          {eligibilityOpen && <section className="eligibility-check" aria-label={isTe ? 'అర్హత పరిశీలన' : 'Eligibility checker'}>
+            <div className="eligibility-title"><div><span className="eyebrow">{isTe ? 'త్వరిత అంచనా' : 'QUICK PRE-CHECK'}</span><h3>{isTe ? 'మీ గురించి కొంచెం చెప్పండి' : 'Tell us a little about yourself'}</h3><p>{isTe ? 'ఇవి ప్రారంభ సూచనలు మాత్రమే; తుది అర్హతను అధికారిక శాఖ నిర్ణయిస్తుంది.' : 'This is a preliminary guide, not an official eligibility decision.'}</p></div><button type="button" className="eligibility-close" onClick={() => setEligibilityOpen(false)} aria-label="Close">×</button></div>
+            <div className="eligibility-fields">
+              <label>{isTe ? 'మీ రాష్ట్రం' : 'Your state'}<select value={profileState} onChange={e => setProfileState(e.target.value)}>{states.map(s => <option key={s} value={s}>{s}</option>)}</select></label>
+              <label>{isTe ? 'వయస్సు పరిధి' : 'Age group'}<select value={ageGroup} onChange={e => setAgeGroup(e.target.value)}><option value="under18">{isTe ? '18 కంటే తక్కువ' : 'Under 18'}</option><option value="adult">{isTe ? '18–59 సంవత్సరాలు' : '18–59 years'}</option><option value="senior">{isTe ? '60 సంవత్సరాలు లేదా ఎక్కువ' : '60+ years'}</option></select></label>
+            </div>
+            <div className="eligibility-interests"><strong>{isTe ? 'మీకు సంబంధించిన అంశాలను ఎంచుకోండి' : 'What describes your needs? Select all that apply.'}</strong><div className="interest-grid">{profileOptions.map(p => <label key={p.id} className="interest-option"><input type="checkbox" checked={profiles.includes(p.id)} onChange={e => setProfiles(old => e.target.checked ? [...old, p.id] : old.filter(id => id !== p.id))}/><span>{isTe ? p.te : p.en}</span></label>)}</div></div>
+            <div className="eligibility-result"><div><strong>{isTe ? 'మీ ఎంపికలకు సరిపడే పథకాలు' : 'Schemes to explore'}</strong><p>{isTe ? 'మీ ఎంపికల ఆధారంగా' : 'Based on your state and selected interests'} · {eligibilityMatches.length} {isTe ? 'పథకాలు' : 'schemes'}</p></div><button type="button" className="official-button" onClick={() => { setMode('state'); setState(profileState); setSearch(''); setCategory('all'); setEligibilityOpen(false); document.getElementById('schemes')?.scrollIntoView({behavior:'smooth'}); }}>{isTe ? 'పథకాలను చూడండి' : 'View schemes'} <ArrowRight size={16}/></button></div>
+            <p className="eligibility-disclaimer">{isTe ? 'గమనిక: వయస్సు ఎంపిక సమాచారం కోసం మాత్రమే; ఇది ప్రస్తుతం ఫలితాలను మార్చదు. దరఖాస్తు ముందు ప్రతి పథకం అధికారిక అర్హతను చదవండి.' : 'Note: Age is collected for context and does not currently change results. Matches are based on scheme categories, not a full legal eligibility assessment. Confirm every condition on the official scheme page.'}</p>
+          </section>}
 
           <div className="mode-tabs" role="tablist" aria-label="Government level">
             <button type="button" role="tab" aria-selected={mode === 'state'} className={mode === 'state' ? 'mode-tab active' : 'mode-tab'} onClick={() => switchMode('state')}><MapPinned size={20}/><span><strong>{isTe ? 'రాష్ట్ర ప్రభుత్వ పథకాలు' : 'State Government'}</strong><small>{isTe ? 'మీ రాష్ట్రాన్ని ఎంచుకోండి' : 'Choose your state'}</small></span></button>
